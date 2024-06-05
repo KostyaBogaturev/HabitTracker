@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace HabitTracker.Models
 {
-    public class HabitAppContext : DbContext
+    public class HabitAppContext : IdentityDbContext<User>
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Habit> Habits { get; set; }
         public DbSet<HabitTracking> HabitTrackings { get; set; }
 
@@ -15,9 +15,7 @@ namespace HabitTracker.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.UserId)
-                .IsUnique();
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Habit>()
                 .HasIndex(h => h.HabitId)
