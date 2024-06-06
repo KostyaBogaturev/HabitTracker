@@ -1,4 +1,6 @@
 using HabitTracker.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -24,6 +26,19 @@ var connectionString = builder.Configuration.GetConnectionString("MSSQL");
 builder.Services.AddDbContext<HabitAppContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(options =>
+{
+    var googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthSection["ClientId"];
+    options.ClientSecret = googleAuthSection["ClientSecret"];
+});
+
 builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<HabitAppContext>();
 
 var app = builder.Build();
@@ -39,6 +54,7 @@ app.MapIdentityApi<User>();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
